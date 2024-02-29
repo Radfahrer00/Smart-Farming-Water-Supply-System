@@ -1,0 +1,570 @@
+{
+  "ruleChain": {
+    "additionalInfo": {
+      "description": ""
+    },
+    "name": "Node reception",
+    "firstRuleNodeId": null,
+    "root": false,
+    "debugMode": false,
+    "configuration": null
+  },
+  "metadata": {
+    "firstNodeIndex": 7,
+    "nodes": [
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 852,
+          "layoutY": 762
+        },
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "remove attributes states",
+        "debugMode": true,
+        "configuration": {
+          "jsScript": "newMsg4={};\nnewMsg4.ph=msg.ph;\nnewMsg4.conductivity=msg.conductivity;\nnewMsg4[\"water level\"]=msg[\"water level\"];\n\nreturn {msg: newMsg4, metadata: metadata, msgType: msgType};"
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 850,
+          "layoutY": 628
+        },
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "change to Post attribute request and get only attributes from msg",
+        "debugMode": true,
+        "configuration": {
+          "jsScript": "newMsg2={};\n\nnewMsgType=\"POST_ATTRIBUTES_REQUEST\"\n\nif (msg.valve==0) newMsg2.valveState=false;\nif (msg.valve==1) newMsg2.valveState=true;\n\nif (msg.pump==0) newMsg2.pumpState=false;\nif (msg.pump==1) newMsg2.pumpState=true;\n\nif (msg.device==0) newMsg2.deviceState=false;\nif (msg.device==1) newMsg2.deviceState=true;\n\n\nnewMetadata.scope = \"SHARED_SCOPE\"\n\nreturn {msg: newMsg2, metadata: newMetadata, msgType: newMsgType};"
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "Prepara the RPC command to tell the sensor the new operation mode",
+          "layoutX": 1468,
+          "layoutY": 295
+        },
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "Emptying Valve RPC command",
+        "debugMode": true,
+        "configuration": {
+          "jsScript": "var newMsg = {};\nvar newMetadata = {};\n\nnewMsg.method=\"changeValveState\";\n\nparams={};\nparams.nodeID=parseInt(metadata.shared_deviceID);\nparams.state=msg.valveState;\nif (msg.valveState==0) params.state=false;\nif (msg.valveState==1) params.state=true;\n\nnewMsg.params = params;\nreturn {msg: newMsg, metadata: metadata, msgType: msgType};"
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 557,
+          "layoutY": 481
+        },
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "change to Post attribute request",
+        "debugMode": true,
+        "configuration": {
+          "jsScript": "newMsgType=\"POST_ATTRIBUTES_REQUEST\"\n\nif (msg.valveState==0) msg.valveState=false;\nif (msg.valveState==1) msg.valveState=true;\n\nif (msg.pumpState==0) msg.pumpState=false;\nif (msg.pumpState==1) msg.pumpState=true;\n\nif (msg.deviceState==0) msg.deviceState=false;\nif (msg.deviceState==1) msg.deviceState=true;\n\nnewMetadata.scope = \"SHARED_SCOPE\";\n\nreturn {msg: msg, metadata: newMetadata, msgType: newMsgType};"
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 662,
+          "layoutY": 151
+        },
+        "type": "org.thingsboard.rule.engine.metadata.TbGetAttributesNode",
+        "name": "get device ID",
+        "debugMode": true,
+        "configuration": {
+          "tellFailureIfAbsent": true,
+          "clientAttributeNames": [],
+          "sharedAttributeNames": [
+            "deviceID"
+          ],
+          "serverAttributeNames": [],
+          "latestTsKeyNames": [],
+          "getLatestValueWithTs": false
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 431,
+          "layoutY": 370
+        },
+        "type": "org.thingsboard.rule.engine.filter.TbCheckMessageNode",
+        "name": "check Attribute received from mobile",
+        "debugMode": true,
+        "configuration": {
+          "messageNames": [
+            "limitPhUPPER",
+            "limitPhLOWER",
+            "limitWaterLevelUPPER",
+            "limitWaterLevelMidUPPER",
+            "limitWaterLevelMidLOWER",
+            "limitWaterLevelLOWER",
+            "limitConductivityUPPER",
+            "limitConductivityLOWER",
+            "deviceState",
+            "valveState",
+            "pumpState"
+          ],
+          "metadataNames": [],
+          "checkAllKeys": false
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "Prepara the RPC command to tell the sensor the new operation mode",
+          "layoutX": 1467,
+          "layoutY": 32
+        },
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "Water level RPC command",
+        "debugMode": true,
+        "configuration": {
+          "jsScript": "var newMsg = {};\nvar newMetadata = {};\n\nnewMsg.method=\"changeLimit\";\nparams={};\n\nparams.nodeID=parseInt(metadata.shared_deviceID);\nparams.variable=\"water level\";\n\n    if (msg.limitWaterLevelUPPER !== undefined){\n        params.limitType=\"UPPER\";\n        params.limitValue=parseInt(msg.limitWaterLevelUPPER);\n    }\n        \n    if (msg.limitWaterLevelMidUPPER !== undefined){\n        params.limitType=\"MidUPPER\";\n        params.limitValue=parseInt(msg.limitWaterLevelMidUPPER);\n        \n    }\n    if (msg.limitWaterLevelMidLOWER !== undefined){\n        params.limitType=\"MidLOWER\";\n        params.limitValue=parseInt(msg.limitWaterLevelMidLOWER);\n    }\n    if (msg.limitWaterLevelLOWER !== undefined){\n        params.limitType=\"LOWER\";\n        params.limitValue=parseInt(msg.limitWaterLevelLOWER);\n    }\n    \n\n\nnewMsg.params = params;\nreturn {msg: newMsg, metadata: metadata, msgType: msgType};"
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 283,
+          "layoutY": 152
+        },
+        "type": "org.thingsboard.rule.engine.filter.TbMsgTypeSwitchNode",
+        "name": "Check message type",
+        "debugMode": true,
+        "configuration": {
+          "version": 0
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1851,
+          "layoutY": 145
+        },
+        "type": "org.thingsboard.rule.engine.rpc.TbSendRPCRequestNode",
+        "name": "Send RPC to plant sensor",
+        "debugMode": true,
+        "configuration": {
+          "timeoutInSeconds": 60
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 343,
+          "layoutY": 700
+        },
+        "type": "org.thingsboard.rule.engine.profile.TbDeviceProfileNode",
+        "name": "Check alarms",
+        "debugMode": true,
+        "configuration": {
+          "persistAlarmRulesState": true,
+          "fetchAlarmRulesStateOnStart": true
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "Sometimes tranformation node is adding random values from other groups (operation, soilMoistureLimit)",
+          "layoutX": 599,
+          "layoutY": 629
+        },
+        "type": "org.thingsboard.rule.engine.filter.TbCheckMessageNode",
+        "name": "Check JSON integrity",
+        "debugMode": true,
+        "configuration": {
+          "messageNames": [
+            "valve",
+            "pump",
+            "device"
+          ],
+          "metadataNames": [],
+          "checkAllKeys": true
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "Sometimes tranformation node is adding random values from other groups (operation, soilMoistureLimit)",
+          "layoutX": 607,
+          "layoutY": 763
+        },
+        "type": "org.thingsboard.rule.engine.filter.TbCheckMessageNode",
+        "name": "Check JSON integrity",
+        "debugMode": true,
+        "configuration": {
+          "messageNames": [
+            "ph",
+            "conductivity",
+            "water level"
+          ],
+          "metadataNames": [],
+          "checkAllKeys": true
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "Prepara the RPC command to tell the sensor the new operation mode",
+          "layoutX": 1466,
+          "layoutY": 161
+        },
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "Conductivity RPC command",
+        "debugMode": true,
+        "configuration": {
+          "jsScript": "var newMsg = {};\nvar newMetadata = {};\n\nnewMsg.method=\"changeLimit\";\nparams={};\nparams.nodeID=parseInt(metadata.shared_deviceID);\nparams.variable=\"conductivity\";\nparams.limitType=\"UPPER\";\nparams.limitValue=parseInt(msg.limitConductivityUPPER);\n\n\nnewMsg.params = params;\nreturn {msg: newMsg, metadata: metadata, msgType: msgType};"
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "Sometimes tranformation node is adding random values from other groups (operation, soilMoistureLimit)",
+          "layoutX": 1127,
+          "layoutY": 761
+        },
+        "type": "org.thingsboard.rule.engine.filter.TbCheckMessageNode",
+        "name": "Check JSON integrity",
+        "debugMode": true,
+        "configuration": {
+          "messageNames": [
+            "conductivity",
+            "ph"
+          ],
+          "metadataNames": [],
+          "checkAllKeys": true
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "Sometimes tranformation node is adding random values from other groups (operation, soilMoistureLimit)",
+          "layoutX": 1133,
+          "layoutY": 624
+        },
+        "type": "org.thingsboard.rule.engine.filter.TbCheckMessageNode",
+        "name": "Check JSON integrity",
+        "debugMode": true,
+        "configuration": {
+          "messageNames": [
+            "valveState",
+            "pumpState",
+            "deviceState"
+          ],
+          "metadataNames": [],
+          "checkAllKeys": true
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1403,
+          "layoutY": 626
+        },
+        "type": "org.thingsboard.rule.engine.telemetry.TbMsgAttributesNode",
+        "name": "update attributes",
+        "debugMode": true,
+        "configuration": {
+          "scope": "SHARED_SCOPE",
+          "notifyDevice": true
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "Prepara the RPC command to tell the sensor the new operation mode",
+          "layoutX": 1467,
+          "layoutY": 227
+        },
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "Device State RPC command",
+        "debugMode": true,
+        "configuration": {
+          "jsScript": "var newMsg = {};\nvar newMetadata = {};\n\nnewMsg.method=\"changeDeviceState\";\n\nparams={};\nparams.nodeID=parseInt(metadata.shared_deviceID);\nparams.state=msg.deviceState;\nnewMsg.params = params;\nreturn {msg: newMsg, metadata: metadata, msgType: msgType};"
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 677,
+          "layoutY": 264
+        },
+        "type": "org.thingsboard.rule.engine.telemetry.TbMsgAttributesNode",
+        "name": "update attributes",
+        "debugMode": true,
+        "configuration": {
+          "scope": "SHARED_SCOPE",
+          "notifyDevice": true
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "Prepara the RPC command to tell the sensor the new operation mode",
+          "layoutX": 1472,
+          "layoutY": 368
+        },
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "Pump RPC command",
+        "debugMode": true,
+        "configuration": {
+          "jsScript": "var newMsg = {};\nvar newMetadata = {};\n\nnewMsg.method=\"changePumpState\";\n\nparams={};\nparams.nodeID=parseInt(metadata.shared_deviceID);\n\nparams.state=msg.pumpState;\nif (msg.pumpState==0) params.state=false;\nif (msg.pumpState==1) params.state=true;\n\nnewMsg.params = params;\nreturn {msg: newMsg, metadata: metadata, msgType: msgType};"
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1198,
+          "layoutY": 13
+        },
+        "type": "org.thingsboard.rule.engine.action.TbCreateAlarmNode",
+        "name": "Incorrect message syntax",
+        "debugMode": true,
+        "configuration": {
+          "alarmDetailsBuildJs": "var details = {};\nif (metadata.prevAlarmDetails) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n}\nreturn details;",
+          "useMessageAlarmData": false,
+          "alarmType": "incorrect message syntax",
+          "severity": "MAJOR",
+          "propagate": false,
+          "relationTypes": []
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 59,
+          "layoutY": 699
+        },
+        "type": "org.thingsboard.rule.engine.filter.TbCheckMessageNode",
+        "name": "Check JSON integrity",
+        "debugMode": true,
+        "configuration": {
+          "messageNames": [
+            "ph",
+            "conductivity",
+            "water level",
+            "valve",
+            "device",
+            "pump"
+          ],
+          "metadataNames": [],
+          "checkAllKeys": true
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 980,
+          "layoutY": 156
+        },
+        "type": "org.thingsboard.rule.engine.filter.TbJsSwitchNode",
+        "name": "Check attribute change",
+        "debugMode": true,
+        "configuration": {
+          "jsScript": "function nextRelation(metadata, msg) {\n    \n    if (msg.limitWaterLevelUPPER !== undefined) return 'Limits Water level'\n    if (msg.limitWaterLevelMidUPPER !== undefined) return 'Limits Water level'\n    if (msg.limitWaterLevelMidLOWER !== undefined) return 'Limits Water level'\n    if (msg.limitWaterLevelLOWER !== undefined) return 'Limits Water level'\n    \n    if (msg.limitPhUPPER !== undefined) return 'Limits PH'\n    if (msg.limitPhLOWER !== undefined) return 'Limits PH'\n    \n    if (msg.limitConductivityUPPER !== undefined) return 'Limits Conductivity'\n    \n    if (msg.deviceState !== undefined) return 'Device STATE change'\n    \n    if (msg.valveState !== undefined) return 'Emptying valve STATE change'\n    \n    if (msg.deviceID !== undefined) return 'DeviceID change'\n    \n    if (msg.pumpState !== undefined) return 'Pump STATE change'\n    \n    return 'Failure'\n}\n\nreturn nextRelation(metadata, msg);"
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "Prepara the RPC command to tell the sensor the new operation mode",
+          "layoutX": 1466,
+          "layoutY": 96
+        },
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "PH RPC command",
+        "debugMode": true,
+        "configuration": {
+          "jsScript": "var newMsg = {};\nvar newMetadata = {};\n\nnewMsg.method=\"changeLimit\";\nparams={};\nparams.nodeID=parseInt(metadata.shared_deviceID);\nparams.variable=\"ph\";\n\n    if (msg.limitPhUPPER !== undefined){\n        params.limitType=\"UPPER\";\n        params.limitValue=parseInt(msg.limitPhUPPER);\n    }\n        \n    if (msg.limitPhLOWER !== undefined){\n        params.limitType=\"LOWER\";\n        params.limitValue=parseInt(msg.limitPhLOWER);\n    }\n    \n\nnewMsg.params = params;\nreturn {msg: newMsg, metadata: metadata, msgType: msgType};"
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "Sometimes tranformation node is adding random values from other groups (operation, soilMoistureLimit)",
+          "layoutX": 678,
+          "layoutY": 369
+        },
+        "type": "org.thingsboard.rule.engine.filter.TbCheckMessageNode",
+        "name": "Check JSON integrity",
+        "debugMode": true,
+        "configuration": {
+          "messageNames": [
+            "valveState",
+            "pumpState",
+            "deviceState",
+            "limitWaterLevelUPPER",
+            "limitWaterLevelMidUPPER",
+            "limitWaterLevelMidLOWER",
+            "limitWaterLevelLOWER",
+            "limitPhUPPER",
+            "limitPhLOWER",
+            "limitConductivityUPPER",
+            "limitConductivityLOWER"
+          ],
+          "metadataNames": [],
+          "checkAllKeys": false
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1400,
+          "layoutY": 757
+        },
+        "type": "org.thingsboard.rule.engine.telemetry.TbMsgTimeseriesNode",
+        "name": "save data from sensor",
+        "debugMode": true,
+        "configuration": {
+          "defaultTTL": 0
+        }
+      }
+    ],
+    "connections": [
+      {
+        "fromIndex": 0,
+        "toIndex": 13,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 1,
+        "toIndex": 14,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 2,
+        "toIndex": 8,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 3,
+        "toIndex": 23,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 4,
+        "toIndex": 21,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 5,
+        "toIndex": 3,
+        "type": "True"
+      },
+      {
+        "fromIndex": 6,
+        "toIndex": 8,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 7,
+        "toIndex": 20,
+        "type": "Post telemetry"
+      },
+      {
+        "fromIndex": 7,
+        "toIndex": 4,
+        "type": "Attributes Updated"
+      },
+      {
+        "fromIndex": 7,
+        "toIndex": 5,
+        "type": "Post telemetry"
+      },
+      {
+        "fromIndex": 9,
+        "toIndex": 10,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 9,
+        "toIndex": 11,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 10,
+        "toIndex": 1,
+        "type": "True"
+      },
+      {
+        "fromIndex": 11,
+        "toIndex": 0,
+        "type": "True"
+      },
+      {
+        "fromIndex": 12,
+        "toIndex": 8,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 13,
+        "toIndex": 24,
+        "type": "True"
+      },
+      {
+        "fromIndex": 14,
+        "toIndex": 15,
+        "type": "True"
+      },
+      {
+        "fromIndex": 16,
+        "toIndex": 8,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 17,
+        "toIndex": 4,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 18,
+        "toIndex": 8,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 20,
+        "toIndex": 9,
+        "type": "True"
+      },
+      {
+        "fromIndex": 21,
+        "toIndex": 22,
+        "type": "Limits PH"
+      },
+      {
+        "fromIndex": 21,
+        "toIndex": 12,
+        "type": "Limits Conductivity"
+      },
+      {
+        "fromIndex": 21,
+        "toIndex": 16,
+        "type": "Device STATE change"
+      },
+      {
+        "fromIndex": 21,
+        "toIndex": 2,
+        "type": "Emptying valve STATE change"
+      },
+      {
+        "fromIndex": 21,
+        "toIndex": 19,
+        "type": "Failure"
+      },
+      {
+        "fromIndex": 21,
+        "toIndex": 18,
+        "type": "Pump STATE change"
+      },
+      {
+        "fromIndex": 21,
+        "toIndex": 6,
+        "type": "Limits Water level"
+      },
+      {
+        "fromIndex": 22,
+        "toIndex": 8,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 23,
+        "toIndex": 17,
+        "type": "True"
+      }
+    ],
+    "ruleChainConnections": null
+  }
+}

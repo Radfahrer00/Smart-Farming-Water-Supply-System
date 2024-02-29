@@ -1,0 +1,677 @@
+[
+    {
+        "id": "655fa9ccb8ed799b",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "1e4c1b8cec020de8",
+        "type": "mqtt out",
+        "z": "655fa9ccb8ed799b",
+        "name": "",
+        "topic": "trough2/measures",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "174df8aef52b95c0",
+        "x": 930,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "db2e06a6b30c0609",
+        "type": "inject",
+        "z": "655fa9ccb8ed799b",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 160,
+        "y": 140,
+        "wires": [
+            [
+                "1ed29269f4100807"
+            ]
+        ]
+    },
+    {
+        "id": "1ed29269f4100807",
+        "type": "function",
+        "z": "655fa9ccb8ed799b",
+        "name": "first telemetry generation",
+        "func": "\nmsg = {};\nmsg.payload = {};\nmsg.payload.ph = 7;\nmsg.payload.waterlevel = 50;\nmsg.payload.conductivity = 2;\nmsg.payload.device =1;\nmsg.payload.pump= 0;\nmsg.payload.valve =0;\n\nreturn msg;\n\n\n// payload = ph,waterlevel,conductivity,device,pump,valve",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 430,
+        "y": 140,
+        "wires": [
+            [
+                "e6a1761690934a8b"
+            ]
+        ]
+    },
+    {
+        "id": "e6a1761690934a8b",
+        "type": "csv",
+        "z": "655fa9ccb8ed799b",
+        "name": "",
+        "sep": ",",
+        "hdrin": "",
+        "hdrout": "none",
+        "multi": "one",
+        "ret": "\\n",
+        "temp": "ph,waterlevel,conductivity,device,pump,valve",
+        "skip": "0",
+        "strings": true,
+        "include_empty_strings": "",
+        "include_null_values": "",
+        "x": 670,
+        "y": 140,
+        "wires": [
+            [
+                "1e4c1b8cec020de8",
+                "de25d680ede2ec5b"
+            ]
+        ]
+    },
+    {
+        "id": "de25d680ede2ec5b",
+        "type": "debug",
+        "z": "655fa9ccb8ed799b",
+        "name": "First payload",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 690,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "87165181461ca14a",
+        "type": "mqtt in",
+        "z": "655fa9ccb8ed799b",
+        "name": "",
+        "topic": "trough2/measures",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "174df8aef52b95c0",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 110,
+        "y": 280,
+        "wires": [
+            [
+                "07a70ae421f477ab"
+            ]
+        ]
+    },
+    {
+        "id": "07a70ae421f477ab",
+        "type": "csv",
+        "z": "655fa9ccb8ed799b",
+        "name": "",
+        "sep": ",",
+        "hdrin": "",
+        "hdrout": "none",
+        "multi": "one",
+        "ret": "\\n",
+        "temp": "ph,waterlevel,conductivity,device,pump,valve",
+        "skip": "0",
+        "strings": true,
+        "include_empty_strings": "",
+        "include_null_values": "",
+        "x": 310,
+        "y": 280,
+        "wires": [
+            [
+                "a7e18e29ae5579cf"
+            ]
+        ]
+    },
+    {
+        "id": "a7e18e29ae5579cf",
+        "type": "function",
+        "z": "655fa9ccb8ed799b",
+        "name": "node loop",
+        "func": "\nif (msg.payload.ph <= 7) msg.payload.ph=msg.payload.ph + 0.1;\nelse msg.payload.ph = 7;\n\nif (msg.payload.waterlevel >= 30) msg.payload.waterlevel=msg.payload.waterlevel - 0.5;\nelse msg.payload.waterlevel= 80\n\nif (msg.payload.conductivity <= 5) msg.payload.conductivity = msg.payload.conductivity + 0.5;\nelse msg.payload.conductivity = 5;\n\nreturn msg;\n\n\n// payload = ph,waterlevel,conductivity",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 520,
+        "y": 280,
+        "wires": [
+            [
+                "8f1739e52092b80b"
+            ]
+        ]
+    },
+    {
+        "id": "8f1739e52092b80b",
+        "type": "csv",
+        "z": "655fa9ccb8ed799b",
+        "name": "",
+        "sep": ",",
+        "hdrin": "",
+        "hdrout": "none",
+        "multi": "one",
+        "ret": "\\n",
+        "temp": "ph,waterlevel,conductivity,device,pump,valve",
+        "skip": "0",
+        "strings": true,
+        "include_empty_strings": "",
+        "include_null_values": "",
+        "x": 710,
+        "y": 280,
+        "wires": [
+            [
+                "f8a66468e50a9957",
+                "e3c699a49b163149"
+            ]
+        ]
+    },
+    {
+        "id": "c6039e3b2f2db906",
+        "type": "mqtt out",
+        "z": "655fa9ccb8ed799b",
+        "name": "",
+        "topic": "trough2/measures",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "174df8aef52b95c0",
+        "x": 1050,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "f8a66468e50a9957",
+        "type": "debug",
+        "z": "655fa9ccb8ed799b",
+        "name": "simulated payload",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 830,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "e3c699a49b163149",
+        "type": "delay",
+        "z": "655fa9ccb8ed799b",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 880,
+        "y": 280,
+        "wires": [
+            [
+                "c6039e3b2f2db906"
+            ]
+        ]
+    },
+    {
+        "id": "e06becd6e0b71fd5",
+        "type": "mqtt in",
+        "z": "655fa9ccb8ed799b",
+        "name": "",
+        "topic": "2/ph/UPPER",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "174df8aef52b95c0",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 90,
+        "y": 400,
+        "wires": [
+            [
+                "056f5ef03f2d3164"
+            ]
+        ]
+    },
+    {
+        "id": "056f5ef03f2d3164",
+        "type": "debug",
+        "z": "655fa9ccb8ed799b",
+        "name": "2/ph/UPPER",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 310,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "70877eb7724c2e82",
+        "type": "mqtt in",
+        "z": "655fa9ccb8ed799b",
+        "name": "",
+        "topic": "2/ph/LOWER",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "174df8aef52b95c0",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 90,
+        "y": 460,
+        "wires": [
+            [
+                "7c1fc131db6f4e65"
+            ]
+        ]
+    },
+    {
+        "id": "7c1fc131db6f4e65",
+        "type": "debug",
+        "z": "655fa9ccb8ed799b",
+        "name": "2/ph/LOWER",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 310,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "9c95279367addcd3",
+        "type": "mqtt in",
+        "z": "655fa9ccb8ed799b",
+        "name": "",
+        "topic": "2/water_level/UPPER",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "174df8aef52b95c0",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 600,
+        "y": 420,
+        "wires": [
+            [
+                "3cdc36df33d462b6"
+            ]
+        ]
+    },
+    {
+        "id": "3cdc36df33d462b6",
+        "type": "debug",
+        "z": "655fa9ccb8ed799b",
+        "name": "2/water_level/UPPER",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 840,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "20cb4bde3e8acef0",
+        "type": "mqtt in",
+        "z": "655fa9ccb8ed799b",
+        "name": "",
+        "topic": "2/water_level/MidUPPER",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "174df8aef52b95c0",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 610,
+        "y": 480,
+        "wires": [
+            [
+                "54481ef8e7636bdd"
+            ]
+        ]
+    },
+    {
+        "id": "54481ef8e7636bdd",
+        "type": "debug",
+        "z": "655fa9ccb8ed799b",
+        "name": "2/water_level/MidUPPER",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 850,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "d2360194d007862c",
+        "type": "mqtt in",
+        "z": "655fa9ccb8ed799b",
+        "name": "",
+        "topic": "2/water_level/MidLOWER",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "174df8aef52b95c0",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 610,
+        "y": 540,
+        "wires": [
+            [
+                "9f5c91651ea59a9f"
+            ]
+        ]
+    },
+    {
+        "id": "9f5c91651ea59a9f",
+        "type": "debug",
+        "z": "655fa9ccb8ed799b",
+        "name": "2/water_level/MidLOWER",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 850,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "62858d3e4e02cf79",
+        "type": "mqtt in",
+        "z": "655fa9ccb8ed799b",
+        "name": "",
+        "topic": "2/water_level/LOWER",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "174df8aef52b95c0",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 600,
+        "y": 600,
+        "wires": [
+            [
+                "e28bf5fc702ad270"
+            ]
+        ]
+    },
+    {
+        "id": "e28bf5fc702ad270",
+        "type": "debug",
+        "z": "655fa9ccb8ed799b",
+        "name": "2/water_level/LOWER",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 840,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "91f8ade07cfb3e64",
+        "type": "mqtt in",
+        "z": "655fa9ccb8ed799b",
+        "name": "",
+        "topic": "2/conductivity/UPPER",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "174df8aef52b95c0",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 120,
+        "y": 520,
+        "wires": [
+            [
+                "959803f25aa50162"
+            ]
+        ]
+    },
+    {
+        "id": "959803f25aa50162",
+        "type": "debug",
+        "z": "655fa9ccb8ed799b",
+        "name": "2/conductivity/UPPER",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 340,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "10fe8d4ee346ebc3",
+        "type": "mqtt in",
+        "z": "655fa9ccb8ed799b",
+        "name": "",
+        "topic": "2/enable",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "174df8aef52b95c0",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 80,
+        "y": 600,
+        "wires": [
+            [
+                "c5bb0494258928f6"
+            ]
+        ]
+    },
+    {
+        "id": "f0615699a478aca0",
+        "type": "mqtt in",
+        "z": "655fa9ccb8ed799b",
+        "name": "",
+        "topic": "2/pump/enable",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "174df8aef52b95c0",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 100,
+        "y": 660,
+        "wires": [
+            [
+                "22136a3e9de8e5e7"
+            ]
+        ]
+    },
+    {
+        "id": "b803984e3c5b5170",
+        "type": "mqtt in",
+        "z": "655fa9ccb8ed799b",
+        "name": "",
+        "topic": "2/valve/enable",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "174df8aef52b95c0",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 90,
+        "y": 720,
+        "wires": [
+            [
+                "14a7c8d6d2daac95"
+            ]
+        ]
+    },
+    {
+        "id": "22136a3e9de8e5e7",
+        "type": "debug",
+        "z": "655fa9ccb8ed799b",
+        "name": "2/pump/enable",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 280,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "14a7c8d6d2daac95",
+        "type": "debug",
+        "z": "655fa9ccb8ed799b",
+        "name": "2/valve/enable",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 280,
+        "y": 720,
+        "wires": []
+    },
+    {
+        "id": "c5bb0494258928f6",
+        "type": "debug",
+        "z": "655fa9ccb8ed799b",
+        "name": "2/enable",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 260,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "174df8aef52b95c0",
+        "type": "mqtt-broker",
+        "name": "Gateway broker",
+        "broker": "test.mosquitto.org",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    }
+]
