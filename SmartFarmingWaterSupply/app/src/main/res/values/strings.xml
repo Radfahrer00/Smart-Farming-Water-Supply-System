@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">Smart Farming Water Supply</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="node_name">Node Name</string>
+    <string name="water_level_widget_title">Water Level</string>
+    <string name="pH_level_widget_title_">pH Level</string>
+    <string name="water_conductivity_widget_title">Water Conductivity</string>
+    <string name="valve_status_widget_title">Valve Status</string>
+    <string name="pump_status_widget_title">Pump Status</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="login">Login</string>
+    <string name="attribute_key">Attribute Key</string>
+    <string name="current_value">Current Value</string>
+    <string name="new_value">New Value</string>
+    <string name="title_commands">Commands</string>
+    <string name="time">Created Time</string>
+    <string name="type">Type</string>
+    <string name="severity">Severity</string>
+    <string name="status">Status</string>
+    <string name="attribute">Attribute</string>
+    <string name="value">Value</string>
+    <string name="enter_username">Please enter a Username</string>
+    <string name="enter_password">Please enter a Password</string>
+</resources>
